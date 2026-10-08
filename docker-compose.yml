@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: urban_intelligence_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PROJECT_NAME=AI Urban Intelligence Platform
+      - DEBUG=False
+      - DEVICE=cpu
+      - DATABASE_URL=sqlite+aiosqlite:///./urban_intelligence.db
+    volumes:
+      - ./evidence:/app/evidence
+      - ./sample_videos:/app/sample_videos
+      - ./models:/app/models
+    restart: unless-stopped

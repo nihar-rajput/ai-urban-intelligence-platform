@@ -1,0 +1,63 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+frontend/dist/
+build/
+dist/
+
+# Local databases, uploads, evidence
+*.db
+backend/*.db
+backend/app/*.db
+*.sqlite3
+evidence/
+sample_videos/*.mp4
+sample_videos/*.avi
+sample_videos/*.mov
+!sample_videos/.gitkeep
+!sample_videos/sample_manifest.json
+
+# Model weights
+*.pt
+*.onnx
+*.pth
+*.engine
+models/*.pt
+models/*.onnx
+models/*.pth
+models/*.engine
+!models/.gitkeep
+!models/README.md
+
+# Datasets
+datasets/*
+!datasets/README.md
+!datasets/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

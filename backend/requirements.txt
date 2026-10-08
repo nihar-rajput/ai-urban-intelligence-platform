@@ -1,0 +1,32 @@
+# AI Urban Intelligence Platform - Backend Dependencies
+# System environment: Windows 11, Python 3.11.5, CUDA 12.1+ / RTX 4050 6GB
+
+# Web Framework & API
+fastapi>=0.110.0,<1.0.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0,<3.0.0
+pydantic-settings>=2.2.0
+python-multipart>=0.0.9
+websockets>=12.0
+
+# Database & Async ORM
+sqlalchemy>=2.0.28
+aiosqlite>=0.20.0
+
+# Computer Vision & Machine Learning
+# Note: torch and torchvision are installed with CUDA 12.1 support
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+numpy>=1.26.0
+opencv-python>=4.9.0
+ultralytics>=8.1.0
+
+# Tracking & Analytics
+scipy>=1.12.0
+shapely>=2.0.0
+
+# Testing & Utilities
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+easyocr>=1.7.0
