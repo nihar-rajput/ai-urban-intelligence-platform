@@ -114,6 +114,16 @@ def audit_yolo_dataset(data_yaml_path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Audit road defect dataset format and balance")
-    parser.add_argument("--yaml", default="datasets/data.yaml", help="Path to data.yaml")
+    parser.add_argument("--yaml", default=None, help="Path to data.yaml")
+    parser.add_argument("--data-dir", default=None, help="Directory containing dataset and data.yaml")
     args = parser.parse_args()
-    audit_yolo_dataset(args.yaml)
+
+    yaml_target = args.yaml
+    if not yaml_target and args.data_dir:
+        cand_yaml = os.path.join(args.data_dir, "data.yaml")
+        yaml_target = cand_yaml if os.path.exists(cand_yaml) else args.data_dir
+    if not yaml_target:
+        yaml_target = "datasets/road_potholes/data.yaml"
+
+    audit_yolo_dataset(yaml_target)
+
