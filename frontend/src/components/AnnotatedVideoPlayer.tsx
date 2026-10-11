@@ -9,6 +9,8 @@ interface AnnotatedVideoPlayerProps {
 export const AnnotatedVideoPlayer: React.FC<AnnotatedVideoPlayerProps> = ({ onProcessingComplete }) => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [selectedBus, setSelectedBus] = useState<string>('BUS-001');
+  const [selectedVideo, setSelectedVideo] = useState<string>('demo_road_run.mp4');
+  const [availableVideos, setAvailableVideos] = useState<import('../types').VideoFile[]>([]);
   const [videoSrc, setVideoSrc] = useState<string>('http://127.0.0.1:8000/evidence/annotated_demo_road_run_BUS-001.mp4');
   const [resultStats, setResultStats] = useState<{
     fps: number;
@@ -17,11 +19,26 @@ export const AnnotatedVideoPlayer: React.FC<AnnotatedVideoPlayerProps> = ({ onPr
     time: number;
   } | null>(null);
 
+  React.useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const vids = await api.getVideos();
+        setAvailableVideos(vids);
+        if (vids.length > 0 && !vids.find(v => v.filename === selectedVideo)) {
+          setSelectedVideo(vids[0].filename);
+        }
+      } catch (e) {
+        console.error('Error fetching videos:', e);
+      }
+    };
+    fetchVideos();
+  }, []);
+
   const handleRunInference = async () => {
     setIsProcessing(true);
     setResultStats(null);
     try {
-      const res = await api.processVideo('demo_road_run.mp4', selectedBus, 240);
+      const res = await api.processVideo(selectedVideo, selectedBus, 240);
       setVideoSrc(`http://127.0.0.1:8000/${res.annotated_video_path}?t=${Date.now()}`);
       setResultStats({
         fps: res.processing_fps,
@@ -53,7 +70,33 @@ export const AnnotatedVideoPlayer: React.FC<AnnotatedVideoPlayerProps> = ({ onPr
         </div>
 
         {/* Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Video Selector */}
+          <select
+            value={selectedVideo}
+            onChange={(e) => setSelectedVideo(e.target.value)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '8px',
+              background: '#1e293b',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#38bdf8',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              outline: 'none'
+            }}
+          >
+            {availableVideos.length > 0 ? (
+              availableVideos.map((v) => (
+                <option key={v.filename} value={v.filename}>
+                  📹 {v.filename} ({v.size_mb} MB)
+                </option>
+              ))
+            ) : (
+              <option value="demo_road_run.mp4">📹 demo_road_run.mp4</option>
+            )}
+          </select>
+
           <select
             value={selectedBus}
             onChange={(e) => setSelectedBus(e.target.value)}
@@ -67,9 +110,9 @@ export const AnnotatedVideoPlayer: React.FC<AnnotatedVideoPlayerProps> = ({ onPr
               outline: 'none'
             }}
           >
-            <option value="BUS-001">Stream: BUS-001 (Route 101)</option>
-            <option value="BUS-002">Stream: BUS-002 (Route 204)</option>
-            <option value="BUS-003">Stream: BUS-003 (Route 305)</option>
+            <option value="BUS-001">Camera: BUS-001 (Route 101)</option>
+            <option value="BUS-002">Camera: BUS-002 (Route 204)</option>
+            <option value="BUS-003">Camera: BUS-003 (Route 305)</option>
           </select>
 
           <button
