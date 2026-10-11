@@ -98,6 +98,43 @@ class VideoProcessingService:
 
         return annotated
 
+    @staticmethod
+    def transcode_to_h264(input_path: str, output_path: str) -> bool:
+        """
+        Transcodes raw OpenCV mp4v video to standard H.264 (yuv420p)
+        for native, zero-config HTML5 browser playback in Chrome, Edge, Safari, and Firefox.
+        """
+        try:
+            import subprocess
+            import imageio_ffmpeg
+            ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+            cmd = [
+                ffmpeg_exe, "-y",
+                "-i", input_path,
+                "-c:v", "libx264",
+                "-pix_fmt", "yuv420p",
+                "-preset", "veryfast",
+                "-crf", "23",
+                output_path
+            ]
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if os.path.exists(input_path):
+                try:
+                    os.remove(input_path)
+                except OSError:
+                    pass
+            return True
+        except Exception as e:
+            logger.warning(f"FFmpeg H.264 transcode failed, falling back to raw file: {e}")
+            if os.path.exists(input_path) and input_path != output_path:
+                try:
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
+                    os.rename(input_path, output_path)
+                except OSError:
+                    pass
+            return False
+
     async def process_video(
         self,
         video_path: str,
@@ -122,9 +159,10 @@ class VideoProcessingService:
         base_name = os.path.splitext(os.path.basename(video_path))[0]
         output_filename = f"annotated_{base_name}_{camera_id}.mp4"
         output_path = os.path.join(settings.STORAGE_DIR, output_filename)
+        temp_raw_path = os.path.join(settings.STORAGE_DIR, f"temp_{output_filename}")
 
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        writer = cv2.VideoWriter(temp_raw_path, fourcc, fps, (width, height))
 
         frame_count = 0
         incidents_created = 0
@@ -278,6 +316,8 @@ class VideoProcessingService:
         finally:
             cap.release()
             writer.release()
+            if os.path.exists(temp_raw_path):
+                self.transcode_to_h264(temp_raw_path, output_path)
 
         elapsed_sec = max(time.time() - start_time, 0.001)
         proc_fps = round(frame_count / elapsed_sec, 1)

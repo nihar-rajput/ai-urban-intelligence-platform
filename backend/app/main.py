@@ -42,9 +42,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount evidence directory for serving incident snapshots
+# Mount evidence directory for serving incident snapshots and processed video
 os.makedirs(settings.STORAGE_DIR, exist_ok=True)
 app.mount("/evidence", StaticFiles(directory=settings.STORAGE_DIR), name="evidence")
+
+# Mount sample_videos directory for raw stream playback
+os.makedirs(settings.SAMPLE_VIDEOS_DIR, exist_ok=True)
+app.mount("/sample_videos", StaticFiles(directory=settings.SAMPLE_VIDEOS_DIR), name="sample_videos")
 
 # Include API v1 Router
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)

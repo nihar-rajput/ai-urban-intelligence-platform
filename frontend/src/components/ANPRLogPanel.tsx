@@ -168,11 +168,11 @@ export const ANPRLogPanel: React.FC = () => {
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '12px'
             }}>
-              {filtered.map((item) => {
+              {filtered.map((item, idx) => {
                 const isVerified = item.verification_status === 'VERIFIED';
                 return (
                   <div
-                    key={item.id}
+                    key={`${item.id}-${item.plate_text}-${idx}`}
                     style={{
                       background: 'rgba(15, 23, 42, 0.6)',
                       border: '1px solid rgba(255, 255, 255, 0.08)',

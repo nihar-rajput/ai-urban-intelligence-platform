@@ -19,6 +19,33 @@ import cv2
 import numpy as np
 
 
+def transcode_to_h264(input_path: str, output_path: str) -> bool:
+    """Transcodes video to H.264 (yuv420p) for universal browser support."""
+    try:
+        import subprocess
+        import imageio_ffmpeg
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        temp_out = output_path + ".temp.mp4"
+        cmd = [
+            ffmpeg_exe, "-y",
+            "-i", input_path,
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-preset", "veryfast",
+            "-crf", "23",
+            temp_out
+        ]
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if os.path.exists(temp_out):
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            os.rename(temp_out, output_path)
+        return True
+    except Exception as e:
+        print(f"[Warning] FFmpeg transcode skipped: {e}")
+        return False
+
+
 def create_synthetic_multitask_stream(output_path: str, duration_sec: int = 15, fps: int = 24, width: int = 1280, height: int = 720):
     """
     Synthesizes a continuous onboard bus feed traversing 5 distinct scenarios:
@@ -29,8 +56,9 @@ def create_synthetic_multitask_stream(output_path: str, duration_sec: int = 15, 
     5. Tailgate Zone with clear Indian License Plate for ANPR (DL 01 AB 1234)
     """
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    raw_temp = output_path + ".raw.mp4"
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(output_path, fourcc, float(fps), (width, height))
+    writer = cv2.VideoWriter(raw_temp, fourcc, float(fps), (width, height))
 
     total_frames = duration_sec * fps
     print(f"[Synthesizer] Generating {total_frames} frames ({duration_sec}s) at {width}x{height} @ {fps}fps...")
@@ -187,6 +215,10 @@ def create_synthetic_multitask_stream(output_path: str, duration_sec: int = 15, 
         writer.write(frame)
 
     writer.release()
+    print(f"[Synthesizer] Transcoding to browser-native H.264...")
+    if not transcode_to_h264(raw_temp, output_path):
+        if os.path.exists(raw_temp):
+            os.rename(raw_temp, output_path)
     print(f"[Synthesizer] Multi-scenario continuous feed saved successfully to: {output_path}")
 
 
@@ -196,8 +228,9 @@ def stitch_video_clips(clip_paths: list, output_path: str, target_width: int = 1
     if not valid_clips:
         raise FileNotFoundError(f"None of the provided clips exist: {clip_paths}")
 
+    raw_temp = output_path + ".raw.mp4"
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(output_path, fourcc, target_fps, (target_width, target_height))
+    writer = cv2.VideoWriter(raw_temp, fourcc, target_fps, (target_width, target_height))
 
     total_frames_written = 0
     print(f"[Stitcher] Stitching {len(valid_clips)} clips into: {output_path}")
@@ -218,6 +251,10 @@ def stitch_video_clips(clip_paths: list, output_path: str, target_width: int = 1
         print(f"  -> Added Clip {idx+1}/{len(valid_clips)}: {os.path.basename(clip_path)} ({clip_frames} frames)")
 
     writer.release()
+    print(f"[Stitcher] Transcoding to browser-native H.264...")
+    if not transcode_to_h264(raw_temp, output_path):
+        if os.path.exists(raw_temp):
+            os.rename(raw_temp, output_path)
     print(f"[Stitcher] Complete! Stitched {total_frames_written} frames into {output_path}")
 
 
