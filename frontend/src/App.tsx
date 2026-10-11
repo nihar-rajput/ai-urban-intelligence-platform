@@ -7,6 +7,8 @@ import { LiveMap } from './components/LiveMap';
 import { AnnotatedVideoPlayer } from './components/AnnotatedVideoPlayer';
 import { IncidentFeed } from './components/IncidentFeed';
 import { IncidentModal } from './components/IncidentModal';
+import { ANPRLogPanel } from './components/ANPRLogPanel';
+import { TrafficAnalyticsPanel } from './components/TrafficAnalyticsPanel';
 import { api } from './services/api';
 import type {
   HealthResponse,
@@ -203,6 +205,12 @@ export const App: React.FC = () => {
 
       {/* Annotated Computer Vision Video Player */}
       <AnnotatedVideoPlayer onProcessingComplete={loadData} />
+
+      {/* Traffic Flow & Vehicle Classification Analytics */}
+      <TrafficAnalyticsPanel densityMap={analytics?.traffic_density_by_bus} />
+
+      {/* Automatic Number Plate Recognition (ANPR) Logs & Inspector */}
+      <ANPRLogPanel />
 
       {/* Interactive Leaflet Map with OpenStreetMap */}
       <LiveMap

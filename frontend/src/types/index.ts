@@ -82,3 +82,23 @@ export interface VideoFile {
   size_mb: number;
   extension: string;
 }
+
+export interface ANPRReadingItem {
+  id: number;
+  camera_id: string;
+  track_id: number | null;
+  plate_text: string;
+  confidence: number;
+  evidence_crop_path: string | null;
+  verification_status: 'VERIFIED' | 'NEEDS_REVIEW' | 'REJECTED';
+  timestamp: number;
+  created_at: string | null;
+}
+
+export interface CameraVehicleStats {
+  camera_id: string;
+  active_tracks: number;
+  total_unique_vehicles: number;
+  counts_by_class: Record<string, number>;
+  density_level: string;
+}

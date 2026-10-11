@@ -134,6 +134,29 @@ export const api = {
       })
     });
     return handleResponse(res);
+  },
+
+  async getANPRReadings(params?: {
+    camera_id?: string;
+    verification_status?: string;
+    limit?: number;
+  }): Promise<import('../types').ANPRReadingItem[]> {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== '') {
+          query.append(key, String(val));
+        }
+      });
+    }
+    const res = await fetch(`${API_BASE_URL}/analytics/anpr?${query.toString()}`);
+    return handleResponse<import('../types').ANPRReadingItem[]>(res);
+  },
+
+  async getVehicleAnalytics(cameraId: string): Promise<import('../types').CameraVehicleStats> {
+    const res = await fetch(`${API_BASE_URL}/analytics/vehicles/${cameraId}`);
+    return handleResponse<import('../types').CameraVehicleStats>(res);
   }
 };
+
 
