@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, CheckCircle2, Film, Video, AlertCircle, RefreshCw, Layers, Cpu, ShieldAlert, Car } from 'lucide-react';
 import { api } from '../services/api';
-import { VideoFile } from '../types';
+import type { VideoFile } from '../types';
 
 interface AnnotatedVideoPlayerProps {
   onProcessingComplete: () => void;

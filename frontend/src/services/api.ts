@@ -123,6 +123,9 @@ export const api = {
     elapsed_seconds: number;
     incidents_created: number;
     annotated_video_path: string;
+    unique_vehicles_counted?: number;
+    anpr_readings_count?: number;
+    traffic_density?: string;
   }> {
     const res = await fetch(`${API_BASE_URL}/sources/process-video`, {
       method: 'POST',
